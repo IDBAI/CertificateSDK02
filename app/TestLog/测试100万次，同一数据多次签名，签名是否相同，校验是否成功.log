@@ -1,0 +1,21 @@
+外循环是调整测试的原数据 1000次
+内循环针对同一个数据，执行签名1000次
+
+测试耗时 11m17ms
+
+测试结果：
+
+ecdsaKeyPair != null
+privateKey != null
+publicKey != null
+私钥格式符合PKCS#8
+共钥格式符合X.509
+公钥私钥匹配！
+校验结果：true
+测试完成
+
+Process finished with exit code 0
+
+结论：
+    1、同一原数据，经过多次签名，未出现两次签名相同的情况。
+    2、同一原数据，经过多次签名，每次校验均未出现校验失败的情况。
