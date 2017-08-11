@@ -100,8 +100,8 @@ public class SignVerify {
         if (couterLong < currentCounter) {//非法计数器
             return NoPermission_CounterIllegal;
         }
-        //MVI1600 RTC没有电源，断电时间会不准，所以不验证时间
-        if (!DeviceTypehelper.isMVO1600Device()) {//非MVI1600,需要校验
+        //MVO1600 RTC没有电源，断电时间会不准，所以不验证时间
+        if (!DeviceTypehelper.isMVO1600Device()) {//非MVO1600,需要校验
             //4 issuTime
             byte[] issueTime = certifycateBean.getIssueTime();
             int startTime = UtilsHelper.byteArrayToInt(issueTime);
