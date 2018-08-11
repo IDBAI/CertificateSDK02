@@ -2,6 +2,7 @@ package com.revenco.certificatesdk;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -106,11 +107,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if (publicKey.getFormat().equalsIgnoreCase("X.509")) {
             debug(TAG, "共钥格式符合X.509");
         }
-        if (privateKey.getAlgorithm().equalsIgnoreCase("ECC")) {
-            debug(TAG, "私钥算法符合ECC");
+        if (privateKey.getAlgorithm().equalsIgnoreCase("ECDSA")) {
+            debug(TAG, "私钥算法符合ECDSA");
         }
-        if (publicKey.getAlgorithm().equalsIgnoreCase("ECC")) {
-            debug(TAG, "公钥算法符合ECC");
+        if (publicKey.getAlgorithm().equalsIgnoreCase("ECDSA")) {
+            debug(TAG, "公钥算法符合ECDSA");
         }
         if (ECDSA.isECDSAKeyPair(publicKey, privateKey)) {
             debug(TAG, "公钥私钥匹配！");
@@ -174,21 +175,25 @@ public class MainActivity extends Activity implements View.OnClickListener {
      * @throws SignatureException
      */
     private void signVerifymult() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             byte[] testdata = new byte[]{(byte) i};
             byte[] pre_sign = new byte[1];
-            for (int j = 0; j < 100; j++) {
+
+            for (int j = 0; j < 5; j++) {
                 byte[] sign = ECDSA.generateSign(privateKey, testdata);
                 boolean verifySign = ECDSA.verifySign(publicKey, testdata, sign);
                 boolean equals = Arrays.equals(pre_sign, sign);
+
                 if (!verifySign)
                     error(TAG, "[" + i + " , " + j + "]" + " ：校验是否成功：" + verifySign);
-                else
-                    debug(TAG, "[" + i + " , " + j + "]" + " ：校验是否成功：" + verifySign);
+//                else
+//                    debug(TAG, "[" + i + " , " + j + "]" + " ：校验是否成功：" + verifySign);
+
                 if (equals)
                     error(TAG, "[" + i + " , " + j + "]" + " ：签名是否相同：" + equals);
-                else
-                    debug(TAG, "[" + i + " , " + j + "]" + " ：签名是否相同：" + equals);
+//                else
+//                    debug(TAG, "[" + i + " , " + j + "]" + " ：签名是否相同：" + equals);
+
                 pre_sign = sign;
             }
         }
@@ -207,20 +212,32 @@ public class MainActivity extends Activity implements View.OnClickListener {
             testdata[i] = (byte) Math.round(10.0f);
         }
         debug(TAG, "testdata:" + Utils.byte2HexStrWithoutSpace(testdata));
+        long start1 = SystemClock.currentThreadTimeMillis();
         byte[] sign = ECDSA.generateSign(privateKey, testdata);
+        debug(TAG, "签名耗时：" + (SystemClock.currentThreadTimeMillis()-start1)+" ms");
+
+        long start2 = SystemClock.currentThreadTimeMillis();
         boolean verifySign = ECDSA.verifySign(publicKey, testdata, sign);
+        debug(TAG, "校验耗时：" + (SystemClock.currentThreadTimeMillis()-start2)+" ms");
+
         debug(TAG, "校验是否成功：" + verifySign);
+
+
         debug(TAG, "开始修改原始数据" + SIGNVERIFYTESTLOOP + "次,判断校验是否成功");
+        long start = SystemClock.currentThreadTimeMillis();
         for (int j = 0; j < SIGNVERIFYTESTLOOP; j++) {
             int round = Math.round(10.0f);
             testdata[round] = (byte) round;
-            debug(TAG, "testdata:" + Utils.byte2HexStrWithoutSpace(testdata));
+//            debug(TAG, "testdata:" + Utils.byte2HexStrWithoutSpace(testdata));
             verifySign = ECDSA.verifySign(publicKey, testdata, sign);
-            if (verifySign)
-                debug(TAG, "[" + j + "]" + " ：校验是否成功：" + verifySign);
-            else
+            if (verifySign) {
                 error(TAG, "[" + j + "]" + " ：校验是否成功：" + verifySign);
+            } else {
+//                debug(TAG, "[" + j + "]" + " ：校验是否成功：" + verifySign);
+            }
         }
+        long inter = SystemClock.currentThreadTimeMillis() - start;
+        debug(TAG, SIGNVERIFYTESTLOOP+"次循环，耗时：" + inter+" ms");
     }
 
     /**
@@ -240,15 +257,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
         boolean verifySign = ECDSA.verifySign(publicKey, testdata, sign);
         debug(TAG, "校验是否成功：" + verifySign);
         debug(TAG, "开始修改签名" + SIGNVERIFYTESTLOOP + "次,判断校验是否成功");
+        long start = SystemClock.currentThreadTimeMillis();
         for (int j = 0; j < SIGNVERIFYTESTLOOP; j++) {
             int round = Math.round(10.0f);
             sign[round] = (byte) round;
             verifySign = ECDSA.verifySign(publicKey, testdata, sign);
             if (verifySign)
                 debug(TAG, "[" + j + "]" + " ：校验是否成功：" + verifySign);
-            else
-                error(TAG, "[" + j + "]" + " ：校验是否成功：" + verifySign);
+//            else
+//                error(TAG, "[" + j + "]" + " ：校验是否成功：" + verifySign);
         }
+        debug(TAG, "开始修改签名" + SIGNVERIFYTESTLOOP + "次, 耗时 "+(SystemClock.currentThreadTimeMillis()-start)+" ms");
     }
 
     @Override
@@ -266,9 +285,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        signChangeTest();
                     }
                 }).start();
-                signChangeTest();
+
                 break;
             case R.id.contentChangeTest:
                 new Thread(new Runnable() {

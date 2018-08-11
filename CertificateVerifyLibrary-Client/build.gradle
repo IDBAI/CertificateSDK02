@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 14
@@ -25,17 +25,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    dexOptions {
-        incremental true
-    }
+//    dexOptions {
+//        incremental true
+//    }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.0.0'
     testCompile 'junit:junit:4.12'
     //Spongy Castle artifacts are published on Maven Central.
     // Use Gradle or the android-maven-plugin
@@ -99,16 +97,16 @@ task makeJar3(type: Jar, dependsOn: ['build']) {
     include('org/spongycastle/**/*.class')
 }
 
-//混淆打包jar
-def androidSDKDir = plugins.getPlugin('com.android.library').sdkHandler.getSdkFolder()
-def androidJarDir = androidSDKDir.toString() + '/platforms/' + "${android.compileSdkVersion}" + '/android.jar'
-
-task makeJarWithPro(type: proguard.gradle.ProGuardTask, dependsOn: ['makeJar3']) {
-    injars('build/libs/certificateverifylib-1.0.0.jar')
-    outjars('build/libs/certificateverifylib-pro-1.0.0.jar')
-    libraryjars(androidJarDir)
-    configuration 'proguard-rules.pro'
-}
+////混淆打包jar
+//def androidSDKDir = plugins.getPlugin('com.android.library').sdkHandler.getSdkFolder()
+//def androidJarDir = androidSDKDir.toString() + '/platforms/' + "${android.compileSdkVersion}" + '/android.jar'
+//
+//task makeJarWithPro(type: proguard.gradle.ProGuardTask, dependsOn: ['makeJar3']) {
+//    injars('build/libs/certificateverifylib-1.0.0.jar')
+//    outjars('build/libs/certificateverifylib-pro-1.0.0.jar')
+//    libraryjars(androidJarDir)
+//    configuration 'proguard-rules.pro'
+//}
 
 
 
